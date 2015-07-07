@@ -15,7 +15,7 @@
 #include "CLHelper.h"
 #include "util.h"
 //originally max threads per block was 256
-#define MAX_THREADS_PER_BLOCK 256
+#define MAX_THREADS_PER_BLOCK 16
 #define BILLION 1000000000L
 //Structure to hold a node information
 struct Node

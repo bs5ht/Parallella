@@ -32,8 +32,8 @@ struct Node
 //--note: width is changed to the new_width
 //----------------------------------------------------------
 void run_bfs_cpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
-		int *h_graph_edges, char *h_graph_mask, char *h_updating_graph_mask, \
-		char *h_graph_visited, int *h_cost_ref){
+		int *h_graph_edges, int *h_graph_mask, int *h_updating_graph_mask, \
+		int *h_graph_visited, int *h_cost_ref){
 	char stop;
 	int k = 0;
 	do{
@@ -70,12 +70,12 @@ void run_bfs_cpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 //--breadth first search on GPUs
 //----------------------------------------------------------
 void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
-		int *h_graph_edges, char *h_graph_mask, char *h_updating_graph_mask, \
-		char *h_graph_visited, int *h_cost) 
+		int *h_graph_edges, int *h_graph_mask, int *h_updating_graph_mask, \
+		int *h_graph_visited, int *h_cost) 
 					throw(std::string){
 
 	//int number_elements = height*width;
-	char h_over;
+	int h_over;
 	cl_mem d_graph_nodes, d_graph_edges, d_graph_mask, d_updating_graph_mask, \
 			d_graph_visited, d_cost, d_over;
 	try{
@@ -83,19 +83,19 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 		_clInit();			
 		d_graph_nodes = _clMalloc(no_of_nodes*sizeof(Node), h_graph_nodes);
 		d_graph_edges = _clMalloc(edge_list_size*sizeof(int), h_graph_edges);
-		d_graph_mask = _clMallocRW(no_of_nodes*sizeof(char), h_graph_mask);
-		d_updating_graph_mask = _clMallocRW(no_of_nodes*sizeof(char), h_updating_graph_mask);
-		d_graph_visited = _clMallocRW(no_of_nodes*sizeof(char), h_graph_visited);
+		d_graph_mask = _clMallocRW(no_of_nodes*sizeof(int), h_graph_mask);
+		d_updating_graph_mask = _clMallocRW(no_of_nodes*sizeof(int), h_updating_graph_mask);
+		d_graph_visited = _clMallocRW(no_of_nodes*sizeof(int), h_graph_visited);
 
 
 		d_cost = _clMallocRW(no_of_nodes*sizeof(int), h_cost);
-		d_over = _clMallocRW(sizeof(char), &h_over);
+		d_over = _clMallocRW(sizeof(int), &h_over);
 		
 		_clMemcpyH2D(d_graph_nodes, no_of_nodes*sizeof(Node), h_graph_nodes);
 		_clMemcpyH2D(d_graph_edges, edge_list_size*sizeof(int), h_graph_edges);	
-		_clMemcpyH2D(d_graph_mask, no_of_nodes*sizeof(char), h_graph_mask);	
-		_clMemcpyH2D(d_updating_graph_mask, no_of_nodes*sizeof(char), h_updating_graph_mask);	
-		_clMemcpyH2D(d_graph_visited, no_of_nodes*sizeof(char), h_graph_visited);	
+		_clMemcpyH2D(d_graph_mask, no_of_nodes*sizeof(int), h_graph_mask);	
+		_clMemcpyH2D(d_updating_graph_mask, no_of_nodes*sizeof(int), h_updating_graph_mask);	
+		_clMemcpyH2D(d_graph_visited, no_of_nodes*sizeof(int), h_graph_visited);	
 		_clMemcpyH2D(d_cost, no_of_nodes*sizeof(int), h_cost);	
 			
 		//--2 invoke kernel
@@ -111,7 +111,7 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 		clock_gettime(CLOCK_MONOTONIC, &startT);
 		do{
 			h_over = false;
-			_clMemcpyH2D(d_over, sizeof(char), &h_over);
+			_clMemcpyH2D(d_over, sizeof(int), &h_over);
 			//--kernel 0
 			int kernel_id = 0;
 			int kernel_idx = 0;
@@ -138,7 +138,7 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 			//work_items = no_of_nodes;
 			_clInvokeKernel(kernel_id, no_of_nodes, work_group_size);			
 			
-			_clMemcpyD2H(d_over,sizeof(char), &h_over);
+			_clMemcpyD2H(d_over,sizeof(int), &h_over);
 			}while(h_over);
 			
 		_clFinish();
@@ -197,7 +197,7 @@ int main(int argc, char * argv[])
 	int edge_list_size;
 	FILE *fp;
 	Node* h_graph_nodes;
-	char *h_graph_mask, *h_updating_graph_mask, *h_graph_visited;
+	int *h_graph_mask, *h_updating_graph_mask, *h_graph_visited;
 	try{
 		char *input_f;
 		if(argc!=2){
@@ -230,9 +230,9 @@ int main(int argc, char * argv[])
 		work_group_size = num_of_threads_per_block;
 		// allocate host memory
 		h_graph_nodes = (Node*) malloc(sizeof(Node)*no_of_nodes);
-		h_graph_mask = (char*) malloc(sizeof(char)*no_of_nodes);
-		h_updating_graph_mask = (char*) malloc(sizeof(char)*no_of_nodes);
-		h_graph_visited = (char*) malloc(sizeof(char)*no_of_nodes);
+		h_graph_mask = (int*) malloc(sizeof(int)*no_of_nodes);
+		h_updating_graph_mask = (int*) malloc(sizeof(int)*no_of_nodes);
+		h_graph_visited = (int*) malloc(sizeof(int)*no_of_nodes);
 	
 		int start, edgeno;   
 		// initalize the memory

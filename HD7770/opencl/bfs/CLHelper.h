@@ -33,7 +33,7 @@ struct oclHandleStruct
 
 struct oclHandleStruct oclHandles;
 
-char kernel_file[100]  = "Kernels.cl";
+char kernel_file[100]  = "parallellakernel.cl";
 int total_kernels = 2;
 string kernel_names[2] = {"BFS_1", "BFS_2"};
 int work_group_size = 512;

@@ -5,16 +5,18 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <sys/time.h>
 
 #ifdef  PROFILING
-#include "timer.h"
+//#include "timer.h"
 #endif
+
 
 #include "CLHelper.h"
 #include "util.h"
-
+//originally max threads per block was 256
 #define MAX_THREADS_PER_BLOCK 256
-
+#define BILLION 1000000000L
 //Structure to hold a node information
 struct Node
 {
@@ -102,7 +104,11 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 		double kernel_time = 0.0;		
 		kernel_timer.reset();
 		kernel_timer.start();
+
+		
 #endif
+		struct timespec startT, endT;
+		clock_gettime(CLOCK_MONOTONIC, &startT);
 		do{
 			h_over = false;
 			_clMemcpyH2D(d_over, sizeof(char), &h_over);
@@ -136,6 +142,10 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 			}while(h_over);
 			
 		_clFinish();
+		clock_gettime(CLOCK_MONOTONIC, &endT);
+		uint64_t diff = BILLION * (endT.tv_sec - startT.tv_sec) + endT.tv_nsec - startT.tv_nsec;
+		printf("elapsed accelerator time = %llu nanoseconds\n", (long long unsigned int) diff);
+
 #ifdef	PROFILING
 		kernel_timer.stop();
 		kernel_time = kernel_timer.getTimeInSeconds();
@@ -262,7 +272,10 @@ int main(int argc, char * argv[])
 		h_cost_ref[source]=0;		
 		//---------------------------------------------------------
 		//--gpu entry
+
+		
 		run_bfs_gpu(no_of_nodes,h_graph_nodes,edge_list_size,h_graph_edges, h_graph_mask, h_updating_graph_mask, h_graph_visited, h_cost);	
+		
 		//---------------------------------------------------------
 		//--cpu entry
 		// initalize the memory again
@@ -275,7 +288,14 @@ int main(int argc, char * argv[])
 		source=0;
 		h_graph_mask[source]=true;
 		h_graph_visited[source]=true;
+		struct timespec startT, endT;
+		clock_gettime(CLOCK_MONOTONIC, &startT);
 		run_bfs_cpu(no_of_nodes,h_graph_nodes,edge_list_size,h_graph_edges, h_graph_mask, h_updating_graph_mask, h_graph_visited, h_cost_ref);
+		clock_gettime(CLOCK_MONOTONIC, &endT);
+		uint64_t diff = BILLION * (endT.tv_sec - startT.tv_sec) + endT.tv_nsec - startT.tv_nsec;
+		printf("elapsed cpu time = %llu nanoseconds\n", (long long unsigned int) diff);
+
+
 		//---------------------------------------------------------
 		//--result varification
 		compare_results<int>(h_cost_ref, h_cost, no_of_nodes);

@@ -37,7 +37,7 @@ __kernel void BFS_1( const __global Node* g_graph_nodes,
 }
 
 //--5 parameters
-__kernel void BFS_2(__global char* g_graph_mask,
+__kernel void BFS_2(__global int* g_graph_mask,
 					__global int* g_updating_graph_mask,
 					__global int* g_graph_visited,
 					__global int* g_over,

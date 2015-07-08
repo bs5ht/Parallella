@@ -6,7 +6,7 @@
 #include <string>
 #include <cstring>
 #include <sys/time.h>
-
+#include <time.h>
 #ifdef  PROFILING
 //#include "timer.h"
 #endif
@@ -36,6 +36,8 @@ void run_bfs_cpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 		int *h_graph_visited, int *h_cost_ref){
 	char stop;
 	int k = 0;
+	struct timespec startT, endT;
+    clock_gettime(CLOCK_MONOTONIC, &startT);
 	do{
 		//if no thread changes this value then the loop stops
 		stop=false;
@@ -65,6 +67,9 @@ void run_bfs_cpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 		k++;
 	}
 	while(stop);
+	clock_gettime(CLOCK_MONOTONIC, &endT);
+		uint64_t diff = BILLION * (endT.tv_sec - startT.tv_sec) + endT.tv_nsec - startT.tv_nsec;
+		printf("elapsed cpu time = %llu nanoseconds\n", (long long unsigned int) diff);
 }
 //----------------------------------------------------------
 //--breadth first search on GPUs
@@ -143,9 +148,15 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 
 		_clFinish();
 		clock_gettime(CLOCK_MONOTONIC, &endT);
-		uint64_t diff = BILLION * (endT.tv_sec - startT.tv_sec) + endT.tv_nsec - startT.tv_nsec;
+		uint64_t diff = 1000000000 * (endT.tv_sec - startT.tv_sec);
+		uint64_t nanodiff = endT.tv_nsec - startT.tv_nsec;
 		printf("elapsed accelerator time = %llu nanoseconds\n", (long long unsigned int) diff);
-
+		printf("start time seconds%u \n", startT.tv_sec);
+		printf("end time seconds %u \n", endT.tv_sec);
+        printf("difference %u \n", diff);
+		printf("start time nanoseconds %u \n", startT.tv_nsec);
+		printf("end time nanoseconds %u \n", endT.tv_nsec);
+        printf("nanosecond difference %u \n", nanodiff);
 #ifdef	PROFILING
 		kernel_timer.stop();
 		kernel_time = kernel_timer.getTimeInSeconds();
@@ -288,12 +299,12 @@ int main(int argc, char * argv[])
 		source=0;
 		h_graph_mask[source]=true;
 		h_graph_visited[source]=true;
-		struct timespec startT, endT;
-		clock_gettime(CLOCK_MONOTONIC, &startT);
+
+		//const clock_t begin_time = clock();
 		run_bfs_cpu(no_of_nodes,h_graph_nodes,edge_list_size,h_graph_edges, h_graph_mask, h_updating_graph_mask, h_graph_visited, h_cost_ref);
-		clock_gettime(CLOCK_MONOTONIC, &endT);
-		uint64_t diff = BILLION * (endT.tv_sec - startT.tv_sec) + endT.tv_nsec - startT.tv_nsec;
-		printf("elapsed cpu time = %llu nanoseconds\n", (long long unsigned int) diff);
+
+		//const clock_t begin_time = clock();
+		//printf(" clock function time %u")
 
 
 		//---------------------------------------------------------

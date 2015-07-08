@@ -150,13 +150,13 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 		clock_gettime(CLOCK_MONOTONIC, &endT);
 		uint64_t diff = 1000000000 * (endT.tv_sec - startT.tv_sec);
 		uint64_t nanodiff = endT.tv_nsec - startT.tv_nsec;
-		printf("elapsed accelerator time = %llu nanoseconds\n", (long long unsigned int) diff);
-		printf("start time seconds%u \n", startT.tv_sec);
-		printf("end time seconds %u \n", endT.tv_sec);
-        printf("difference %u \n", diff);
-		printf("start time nanoseconds %u \n", startT.tv_nsec);
-		printf("end time nanoseconds %u \n", endT.tv_nsec);
-        printf("nanosecond difference %u \n", nanodiff);
+		//printf("elapsed accelerator time = %llu nanoseconds\n", (long long unsigned int) diff);
+		//printf("start time seconds%u \n", startT.tv_sec);
+		//printf("end time seconds %u \n", endT.tv_sec);
+        //printf("difference %u \n", diff);
+		//printf("start time nanoseconds %u \n", startT.tv_nsec);
+		//printf("end time nanoseconds %u \n", endT.tv_nsec);
+        printf(" accelerator time %u \n", nanodiff + diff);
 #ifdef	PROFILING
 		kernel_timer.stop();
 		kernel_time = kernel_timer.getTimeInSeconds();

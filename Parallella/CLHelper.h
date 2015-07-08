@@ -216,7 +216,7 @@ void _clInit()
    }
 	char ext_data[2048];
 	clGetDeviceInfo(oclHandles.devices[DEVICE_ID_INUSED], CL_DEVICE_EXTENSIONS, sizeof(ext_data), ext_data, NULL);
-	printf("\n EXTENSIONS: %s \n", ext_data);
+	//printf("\n EXTENSIONS: %s \n", ext_data);
 
 
    //-----------------------------------------------
@@ -233,7 +233,7 @@ void _clInit()
     std::string  source_str = FileToString(kernel_file);
     const char * source    = source_str.c_str();
     size_t sourceSize[]    = { source_str.length() };
-	printf("%s\n", source);
+	//sprintf("%s\n", source);
     oclHandles.program = clCreateProgramWithSource(oclHandles.context,
                                                     1,
                                                     &source,
@@ -315,12 +315,12 @@ void _clInit()
     for (int nKernel = 0; nKernel < total_kernels; nKernel++)
     {
         /* get a kernel object handle for a kernel with the given name */
-	printf("%s\n", kernel_names[nKernel].c_str());
-	printf("helloooo\n");
+	//printf("%s\n", kernel_names[nKernel].c_str());
+	//printf("helloooo\n");
         cl_kernel kernel = clCreateKernel(oclHandles.program,
                                             (kernel_names[nKernel]).c_str(),
                                             &resultCL);
-	printf("%d\n", resultCL);
+	//printf("%d\n", resultCL);
         if ((resultCL != CL_SUCCESS) || (kernel == NULL))
         {
             string errorMsg = "InitCL()::Error: Creating Kernel (clCreateKernel) \"" + kernel_names[nKernel] + "\"";

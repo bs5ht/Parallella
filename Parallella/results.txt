@@ -1,0 +1,12 @@
+---------------------------------
+32 nodes
+Reading File
+ accelerator time 1055268342 
+elapsed cpu time = 18432 nanoseconds
+--cambine:passed:-)
+100 nodes
+Reading File
+ accelerator time 1351386336 
+elapsed cpu time = 36862 nanoseconds
+--cambine:passed:-)
+---------------------------------

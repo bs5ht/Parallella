@@ -5,15 +5,16 @@
 #include <iostream>
 #include <string>
 #include <cstring>
-#include <time.h>
 #include <sys/time.h>
+
 #ifdef  PROFILING
 //#include "timer.h"
 #endif
 
+
 #include "CLHelper.h"
 #include "util.h"
-
+//originally max threads per block was 256
 #define MAX_THREADS_PER_BLOCK 16
 #define BILLION 1000000000L
 //Structure to hold a node information
@@ -74,7 +75,7 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 					throw(std::string){
 
 	//int number_elements = height*width;
-	char h_over;
+	int h_over;
 	cl_mem d_graph_nodes, d_graph_edges, d_graph_mask, d_updating_graph_mask, \
 			d_graph_visited, d_cost, d_over;
 	try{
@@ -82,32 +83,35 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 		_clInit();
 		d_graph_nodes = _clMalloc(no_of_nodes*sizeof(Node), h_graph_nodes);
 		d_graph_edges = _clMalloc(edge_list_size*sizeof(int), h_graph_edges);
-		d_graph_mask = _clMallocRW(no_of_nodes*sizeof(char), h_graph_mask);
-		d_updating_graph_mask = _clMallocRW(no_of_nodes*sizeof(char), h_updating_graph_mask);
-		d_graph_visited = _clMallocRW(no_of_nodes*sizeof(char), h_graph_visited);
+		d_graph_mask = _clMallocRW(no_of_nodes*sizeof(int), h_graph_mask);
+		d_updating_graph_mask = _clMallocRW(no_of_nodes*sizeof(int), h_updating_graph_mask);
+		d_graph_visited = _clMallocRW(no_of_nodes*sizeof(int), h_graph_visited);
 
 
 		d_cost = _clMallocRW(no_of_nodes*sizeof(int), h_cost);
-		d_over = _clMallocRW(sizeof(char), &h_over);
+		d_over = _clMallocRW(sizeof(int), &h_over);
 
 		_clMemcpyH2D(d_graph_nodes, no_of_nodes*sizeof(Node), h_graph_nodes);
 		_clMemcpyH2D(d_graph_edges, edge_list_size*sizeof(int), h_graph_edges);
-		_clMemcpyH2D(d_graph_mask, no_of_nodes*sizeof(char), h_graph_mask);
-		_clMemcpyH2D(d_updating_graph_mask, no_of_nodes*sizeof(char), h_updating_graph_mask);
-		_clMemcpyH2D(d_graph_visited, no_of_nodes*sizeof(char), h_graph_visited);
+		_clMemcpyH2D(d_graph_mask, no_of_nodes*sizeof(int), h_graph_mask);
+		_clMemcpyH2D(d_updating_graph_mask, no_of_nodes*sizeof(int), h_updating_graph_mask);
+		_clMemcpyH2D(d_graph_visited, no_of_nodes*sizeof(int), h_graph_visited);
 		_clMemcpyH2D(d_cost, no_of_nodes*sizeof(int), h_cost);
 
 		//--2 invoke kernel
 #ifdef	PROFILING
-		//timer kernel_timer;
-		//double kernel_time = 0.0;
-		//kernel_timer.reset();
-		//kernel_timer.start();
+		timer kernel_timer;
+		double kernel_time = 0.0;
+		kernel_timer.reset();
+		kernel_timer.start();
+
+
 #endif
-		int count = 0;
+		struct timespec startT, endT;
+		clock_gettime(CLOCK_MONOTONIC, &startT);
 		do{
 			h_over = false;
-			_clMemcpyH2D(d_over, sizeof(char), &h_over);
+			_clMemcpyH2D(d_over, sizeof(int), &h_over);
 			//--kernel 0
 			int kernel_id = 0;
 			int kernel_idx = 0;
@@ -120,7 +124,7 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 			_clSetArgs(kernel_id, kernel_idx++, &no_of_nodes, sizeof(int));
 
 			//int work_items = no_of_nodes;
-			_clInvokeKernel(kernel_id, no_of_nodes, 16);
+			_clInvokeKernel(kernel_id, no_of_nodes, work_group_size);
 
 			//--kernel 1
 			kernel_id = 1;
@@ -132,13 +136,16 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 			_clSetArgs(kernel_id, kernel_idx++, &no_of_nodes, sizeof(int));
 
 			//work_items = no_of_nodes;
-			_clInvokeKernel(kernel_id, no_of_nodes, 16);
+			_clInvokeKernel(kernel_id, no_of_nodes, work_group_size);
 
-			_clMemcpyD2H(d_over,sizeof(char), &h_over);
-			count++;
-			}while(count != 30);
+			_clMemcpyD2H(d_over,sizeof(int), &h_over);
+			}while(h_over);
 
 		_clFinish();
+		clock_gettime(CLOCK_MONOTONIC, &endT);
+		uint64_t diff = BILLION * (endT.tv_sec - startT.tv_sec) + endT.tv_nsec - startT.tv_nsec;
+		printf("elapsed accelerator time = %llu nanoseconds\n", (long long unsigned int) diff);
+
 #ifdef	PROFILING
 		kernel_timer.stop();
 		kernel_time = kernel_timer.getTimeInSeconds();
@@ -189,7 +196,6 @@ int main(int argc, char * argv[])
 	int no_of_nodes;
 	int edge_list_size;
 	FILE *fp;
-	FILE *wp;
 	Node* h_graph_nodes;
 	int *h_graph_mask, *h_updating_graph_mask, *h_graph_visited;
 	try{
@@ -202,7 +208,7 @@ int main(int argc, char * argv[])
 		input_f = argv[1];
 		printf("Reading File\n");
 		//Read in Graph from a file
-		fp = fopen("graph100.txt","r");
+		fp = fopen(input_f,"r");
 		if(!fp){
 		  printf("Error Reading graph file\n");
 		  return 0;
@@ -211,7 +217,7 @@ int main(int argc, char * argv[])
 		int source = 0;
 
 		fscanf(fp,"%d",&no_of_nodes);
-        printf("%d", no_of_nodes);
+
 		int num_of_blocks = 1;
 		int num_of_threads_per_block = no_of_nodes;
 
@@ -267,20 +273,8 @@ int main(int argc, char * argv[])
 		//---------------------------------------------------------
 		//--gpu entry
 
-		struct timespec startT, endT;
-		clock_gettime(CLOCK_MONOTONIC, &startT);
+
 		run_bfs_gpu(no_of_nodes,h_graph_nodes,edge_list_size,h_graph_edges, h_graph_mask, h_updating_graph_mask, h_graph_visited, h_cost);
-		uint64_t diff = BILLION * (endT.tv_sec - startT.tv_sec) + endT.tv_nsec - startT.tv_nsec;
-	printf("elapsed epiphany time = %llu nanoseconds\n", (long long unsigned int) diff);
-		
-		wp = fopen("epiphanyout.txt", "w");
-		for(int tid = 0; tid < no_of_nodes; tid++ )
-		{
-		fprintf(wp, "%d\n",h_cost[tid]);
-	        }
-        	fclose(wp); 
-        	printf("epiphany ran!");
-		
 
 		//---------------------------------------------------------
 		//--cpu entry
@@ -294,22 +288,16 @@ int main(int argc, char * argv[])
 		source=0;
 		h_graph_mask[source]=true;
 		h_graph_visited[source]=true;
+		struct timespec startT, endT;
 		clock_gettime(CLOCK_MONOTONIC, &startT);
 		run_bfs_cpu(no_of_nodes,h_graph_nodes,edge_list_size,h_graph_edges, h_graph_mask, h_updating_graph_mask, h_graph_visited, h_cost_ref);
 		clock_gettime(CLOCK_MONOTONIC, &endT);
-		diff = BILLION * (endT.tv_sec - startT.tv_sec) + endT.tv_nsec - startT.tv_nsec;
-	printf("elapsed time = %llu nanoseconds\n", (long long unsigned int) diff);		
-		//---------------------------------------------------------
-		
-		wp = fopen("cpuout.txt", "w");
-		for(int tid = 0; tid < no_of_nodes; tid++ )
-		{
-		fprintf(wp, "%d\n",h_cost_ref[tid]);
-	        }
-        	fclose(wp); 
+		uint64_t diff = BILLION * (endT.tv_sec - startT.tv_sec) + endT.tv_nsec - startT.tv_nsec;
+		printf("elapsed cpu time = %llu nanoseconds\n", (long long unsigned int) diff);
 
-	
-        //--result varification
+
+		//---------------------------------------------------------
+		//--result varification
 		compare_results<int>(h_cost_ref, h_cost, no_of_nodes);
 		//release host memory
 		free(h_graph_nodes);

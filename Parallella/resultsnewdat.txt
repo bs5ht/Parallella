@@ -1,0 +1,72 @@
+---------------------------------
+32 nodes
+Reading File
+Error Reading graph file
+---------------------------------
+100 nodes
+Reading File
+Error Reading graph file
+---------------------------------
+1k nodes
+Reading File
+ accelerator time 1864143472 
+elapsed cpu time = 460783 nanoseconds
+--cambine:passed:-)
+---------------------------------
+2k nodes
+Reading File
+ accelerator time 2156685347 
+elapsed cpu time = 995291 nanoseconds
+--cambine:passed:-)
+---------------------------------
+4k nodes
+Reading File
+ accelerator time 1958106330 
+elapsed cpu time = 2322346 nanoseconds
+--cambine:passed:-)
+---------------------------------
+8k nodes
+Reading File
+ accelerator time 2340298134 
+elapsed cpu time = 5400377 nanoseconds
+--cambine:passed:-)
+---------------------------------
+16k nodes
+Reading File
+ accelerator time 2901623915 
+elapsed cpu time = 14302703 nanoseconds
+--cambine:passed:-)
+---------------------------------
+32k nodes
+Reading File
+ accelerator time 3820406671 
+elapsed cpu time = 37839496 nanoseconds
+--cambine:passed:-)
+---------------------------------
+64k nodes
+Reading File
+ accelerator time 748633775 
+elapsed cpu time = 100413819 nanoseconds
+--cambine:passed:-)
+---------------------------------
+128k nodes
+Reading File
+ accelerator time 3319562990 
+elapsed cpu time = 233137737 nanoseconds
+--cambine:passed:-)
+---------------------------------
+256k nodes
+Reading File
+ accelerator time 2158776492 
+elapsed cpu time = 591774318 nanoseconds
+--cambine:passed:-)
+---------------------------------
+512k nodes
+Reading File
+ accelerator time 299986515 
+elapsed cpu time = 1063265857 nanoseconds
+--cambine:passed:-)
+---------------------------------
+1M nodes
+Reading File
+Error Reading graph file

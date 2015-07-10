@@ -1,0 +1,82 @@
+---------------------------------
+50 nodes
+Reading File
+ accelerator time 1311941298 
+elapsed cpu time = 18431 nanoseconds
+--cambine:passed:-)
+---------------------------------
+100 nodes
+Reading File
+ accelerator time 1323092225 
+elapsed cpu time = 36863 nanoseconds
+--cambine:passed:-)
+---------------------------------
+200 nodes
+Reading File
+ accelerator time 1320253802 
+elapsed cpu time = 73725 nanoseconds
+--cambine:passed:-)
+400 nodes
+Reading File
+ accelerator time 1586420477 
+elapsed cpu time = 147451 nanoseconds
+--cambine:passed:-)
+800 nodes
+Reading File
+ accelerator time 1854725186 
+elapsed cpu time = 350195 nanoseconds
+--cambine:passed:-)
+---------------------------------
+1.6k nodes
+Reading File
+ accelerator time 1882464322 
+elapsed cpu time = 737253 nanoseconds
+--cambine:passed:-)
+---------------------------------
+3.2k nodes
+Reading File
+ accelerator time 1989513421 
+elapsed cpu time = 1621956 nanoseconds
+--cambine:passed:-)
+---------------------------------
+6.4k nodes
+Reading File
+ accelerator time 2363540175 
+elapsed cpu time = 3815283 nanoseconds
+--cambine:passed:-)
+---------------------------------
+12.8k nodes
+Reading File
+ accelerator time 2481334734 
+elapsed cpu time = 9289385 nanoseconds
+--cambine:passed:-)
+---------------------------------
+25.6k nodes
+Reading File
+ accelerator time 3254841893 
+elapsed cpu time = 23960715 nanoseconds
+--cambine:passed:-)
+---------------------------------
+51.2k nodes
+Reading File
+ accelerator time 205610576 
+elapsed cpu time = 66315886 nanoseconds
+--cambine:passed:-)
+---------------------------------
+102.4k nodes
+Reading File
+ accelerator time 2184655008 
+elapsed cpu time = 165144617 nanoseconds
+--cambine:passed:-)
+---------------------------------
+204.8k nodes
+Reading File
+ accelerator time 2884169636 
+elapsed cpu time = 378782034 nanoseconds
+--cambine:passed:-)
+---------------------------------
+409k nodes
+Reading File
+ accelerator time 3474174580 
+elapsed cpu time = 818921929 nanoseconds
+--cambine:passed:-)

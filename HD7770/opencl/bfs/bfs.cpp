@@ -15,7 +15,7 @@
 #include "CLHelper.h"
 #include "util.h"
 //originally max threads per block was 256
-#define MAX_THREADS_PER_BLOCK 16
+#define MAX_THREADS_PER_BLOCK 512
 #define BILLION 1000000000L
 //Structure to hold a node information
 struct Node
@@ -36,6 +36,8 @@ void run_bfs_cpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 		int *h_graph_visited, int *h_cost_ref){
 	char stop;
 	int k = 0;
+	struct timespec startT, endT;
+	clock_gettime(CLOCK_MONOTONIC, &startT);
 	do{
 		//if no thread changes this value then the loop stops
 		stop=false;
@@ -65,6 +67,9 @@ void run_bfs_cpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, \
 		k++;
 	}
 	while(stop);
+	clock_gettime(CLOCK_MONOTONIC, &endT);
+	uint64_t diff = BILLION * (endT.tv_sec - startT.tv_sec) + endT.tv_nsec - startT.tv_nsec;
+	printf("elapsed cpu time = %llu nanoseconds\n", (long long unsigned int) diff);
 }
 //----------------------------------------------------------
 //--breadth first search on GPUs
@@ -288,12 +293,9 @@ int main(int argc, char * argv[])
 		source=0;
 		h_graph_mask[source]=true;
 		h_graph_visited[source]=true;
-		struct timespec startT, endT;
-		clock_gettime(CLOCK_MONOTONIC, &startT);
+		
 		run_bfs_cpu(no_of_nodes,h_graph_nodes,edge_list_size,h_graph_edges, h_graph_mask, h_updating_graph_mask, h_graph_visited, h_cost_ref);
-		clock_gettime(CLOCK_MONOTONIC, &endT);
-		uint64_t diff = BILLION * (endT.tv_sec - startT.tv_sec) + endT.tv_nsec - startT.tv_nsec;
-		printf("elapsed cpu time = %llu nanoseconds\n", (long long unsigned int) diff);
+		
 
 
 		//---------------------------------------------------------

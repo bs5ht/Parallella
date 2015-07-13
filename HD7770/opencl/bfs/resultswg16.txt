@@ -1,0 +1,78 @@
+---------------------------------
+32 nodes
+Reading File
+elapsed accelerator time = 1405806 nanoseconds
+elapsed cpu time = 1550 nanoseconds
+--cambine:passed:-)
+---------------------------------
+100 nodes
+Reading File
+elapsed accelerator time = 1402041 nanoseconds
+elapsed cpu time = 4210 nanoseconds
+--cambine:passed:-)
+---------------------------------
+1k nodes
+Reading File
+elapsed accelerator time = 1469513 nanoseconds
+elapsed cpu time = 49738 nanoseconds
+--cambine:passed:-)
+---------------------------------
+2k nodes
+Reading File
+elapsed accelerator time = 2133904 nanoseconds
+elapsed cpu time = 101021 nanoseconds
+--cambine:passed:-)
+---------------------------------
+4k nodes
+Reading File
+elapsed accelerator time = 1821984 nanoseconds
+elapsed cpu time = 195880 nanoseconds
+--cambine:passed:-)
+---------------------------------
+8k nodes
+Reading File
+elapsed accelerator time = 2596932 nanoseconds
+elapsed cpu time = 384847 nanoseconds
+--cambine:passed:-)
+---------------------------------
+16k nodes
+Reading File
+elapsed accelerator time = 2983431 nanoseconds
+elapsed cpu time = 977982 nanoseconds
+--cambine:passed:-)
+---------------------------------
+32k nodes
+Reading File
+elapsed accelerator time = 4737262 nanoseconds
+elapsed cpu time = 2555177 nanoseconds
+--cambine:passed:-)
+---------------------------------
+64k nodes
+Reading File
+elapsed accelerator time = 7237165 nanoseconds
+elapsed cpu time = 5774437 nanoseconds
+--cambine:passed:-)
+---------------------------------
+128k nodes
+Reading File
+elapsed accelerator time = 14119988 nanoseconds
+elapsed cpu time = 13278826 nanoseconds
+--cambine:passed:-)
+---------------------------------
+256k nodes
+Reading File
+elapsed accelerator time = 23455090 nanoseconds
+elapsed cpu time = 23234764 nanoseconds
+--cambine:passed:-)
+---------------------------------
+512k nodes
+Reading File
+elapsed accelerator time = 15485576 nanoseconds
+elapsed cpu time = 41609188 nanoseconds
+--cambine:passed:-)
+---------------------------------
+1M nodes
+Reading File
+elapsed accelerator time = 33513727 nanoseconds
+elapsed cpu time = 93638482 nanoseconds
+--cambine:passed:-)

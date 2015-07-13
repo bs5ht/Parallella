@@ -33,7 +33,7 @@ struct oclHandleStruct
 
 struct oclHandleStruct oclHandles;
 
-char kernel_file[100]  = "parallellakernel.cl";
+char kernel_file[100]  = "Kernels.cl";
 int total_kernels = 2;
 string kernel_names[2] = {"BFS_1", "BFS_2"};
 int work_group_size = 512;
@@ -647,8 +647,8 @@ void _clInvokeKernel(int kernel_id, int work_items, int work_group_size) throw(s
 	cl_event e[1];
 	if(work_items%work_group_size != 0)	//process situations that work_items cannot be divided by work_group_size
 	  work_items = work_items + (work_group_size-(work_items%work_group_size));
-  	printf("work group size: %u \n", 16);
-    printf("work items: %u \n", work_items);
+  	//printf("work group size: %u \n", 16);
+    //printf("work items: %u \n", work_items);
 
     size_t local_work_size[] = {work_group_size, 1};
 	size_t global_work_size[] = {work_items, 1};

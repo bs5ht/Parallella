@@ -67,108 +67,101 @@ m[i*size+j]=coe[size-1-i+j];
 
 
 int main(int argc, char *argv[]) {
-printf("hellooo");
-printf("am I sane?");
-printf("WG size of kernel 1 = %d, WG size of kernel 2= %d X %d\n", BLOCK_SIZE_0, BLOCK_SIZE_1_X, BLOCK_SIZE_1_Y);
-  printf("after?");
-
-  float *a=NULL, *b=NULL, *finalVec=NULL;
-  float *m=NULL;
-  int size = -1;
-  printf("wtf is going on here");
-  FILE *fp;
-  
-  // args
-  char filename[200];
-  int quiet=1,timing=0,platform=-1,device=-1;
-  printf("command line issues");
-  // parse command line
-  if (parseCommandline(argc, argv, filename,
-		 &quiet, &timing, &platform, &device, &size)) {
-    printf("hi");
+ printf("WG size of kernel 1 = %d, WG size of kernel 2= %d X %d\n", BLOCK_SIZE_0, BLOCK_SIZE_1_X, BLOCK_SIZE_1_Y);
+    float *a=NULL, *b=NULL, *finalVec=NULL;
+    float *m=NULL;
+    int size = -1;
+    
+    FILE *fp;
+    
+    // args
+    char filename[200];
+    int quiet=1,timing=0,platform=-1,device=-1;
+    
+    // parse command line
+    if (parseCommandline(argc, argv, filename,
+       &quiet, &timing, &platform, &device, &size)) {
     printUsage();
     return 0;
-  }
-  
-  printf("omg boy is this frustrating");
-  context = cl_init_context(platform,device,quiet);
-  printf("context error");  /*
-  if(size < 1)
-    {
-fp = fopen(filename, "r");
-fscanf(fp, "%d", &size);
-
-a = (float *) malloc(size * size * sizeof(float));
-InitMat(fp,size, a, size, size);
-
-b = (float *) malloc(size * sizeof(float));
-InitAry(fp, b, size);
-
-fclose(fp);
-
-    }
-  else
-    {
-printf("create input internally before create, size = %d \n", size);
-
-a = (float *) malloc(size * size * sizeof(float));
-create_matrix(a, size);
-
-b = (float *) malloc(size * sizeof(float));
-for (int i =0; i< size; i++)
-  b[i]=1.0;
-
     }
 
-  if (!quiet) {    
-    printf("The input matrix a is:\n");
-    PrintMat(a, size, size, size);
+    context = cl_init_context(platform,device,quiet);
+    
+    if(size < 1)
+      {
+  fp = fopen(filename, "r");
+  fscanf(fp, "%d", &size);
+    
+  a = (float *) malloc(size * size * sizeof(float));
+  InitMat(fp,size, a, size, size);
 
-    printf("The input array b is:\n");
-    PrintAry(b, size);
-  }
+  b = (float *) malloc(size * sizeof(float));
+  InitAry(fp, b, size);
 
-  // create the solution matrix
-  m = (float *) malloc(size * size * sizeof(float));
- 
-  // create a new vector to hold the final answer
+  fclose(fp);
 
-  finalVec = (float *) malloc(size * sizeof(float));
-  
-  InitPerRun(size,m);
+      }
+    else
+      {
+  printf("create input internally before create, size = %d \n", size);
 
-  //begin timing	
-      // printf("The result of array b is before run: \n");
-      // PrintAry(b, size);
-  
-  // run kernels
-ForwardSub(context,a,b,m,size,timing);
-      // printf("The result of array b is after run: \n");
-      // PrintAry(b, size);
-  
-  //end timing
-  if (!quiet) {
-      printf("The result of matrix m is: \n");
-      
-      PrintMat(m, size, size, size);
-      printf("The result of matrix a is: \n");
+  a = (float *) malloc(size * size * sizeof(float));
+  create_matrix(a, size);
+
+  b = (float *) malloc(size * sizeof(float));
+  for (int i =0; i< size; i++)
+    b[i]=1.0;
+
+      }
+
+    if (!quiet) {    
+      printf("The input matrix a is:\n");
       PrintMat(a, size, size, size);
-      printf("The result of array b is: \n");
+
+      printf("The input array b is:\n");
       PrintAry(b, size);
-      
-      BackSub(a,b,finalVec,size);
-      printf("The final solution is: \n");
-      PrintAry(finalVec,size);
-  }
-  
-  free(m);
-  free(a);
-  free(b);
-  free(finalVec);
-  cl_cleanup();
-  printf("done");
-//OpenClGaussianElimination(context,timing); 
-*/
+    }
+ 
+    // create the solution matrix
+    m = (float *) malloc(size * size * sizeof(float));
+   
+    // create a new vector to hold the final answer
+
+    finalVec = (float *) malloc(size * sizeof(float));
+    
+    InitPerRun(size,m);
+
+    //begin timing  
+        // printf("The result of array b is before run: \n");
+        // PrintAry(b, size);
+    
+    // run kernels
+  ForwardSub(context,a,b,m,size,timing);
+        // printf("The result of array b is after run: \n");
+        // PrintAry(b, size);
+    
+    //end timing
+    if (!quiet) {
+        printf("The result of matrix m is: \n");
+        
+        PrintMat(m, size, size, size);
+        printf("The result of matrix a is: \n");
+        PrintMat(a, size, size, size);
+        printf("The result of array b is: \n");
+        PrintAry(b, size);
+        
+        BackSub(a,b,finalVec,size);
+        printf("The final solution is: \n");
+        PrintAry(finalVec,size);
+    }
+    
+    free(m);
+    free(a);
+    free(b);
+    free(finalVec);
+    cl_cleanup();
+  //OpenClGaussianElimination(context,timing);
+
 return 0;
 }
 

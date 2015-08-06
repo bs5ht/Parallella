@@ -205,6 +205,8 @@ void OpenCL::getDevices(cl_device_type deviceType)
 	/* The following code queries the number of platforms and devices, and
 	 * lists the information about both.
 	 */
+
+
 	clGetPlatformIDs(100, platform_id, &platforms_n);
 	if (VERBOSE)
 	{
@@ -284,15 +286,18 @@ void OpenCL::getDevices(cl_device_type deviceType)
 	{
 		printf("\nError at clCreateCommandQueue! Error code %i\n\n", ret);
 		exit(1);
-	}
+	} 
 }
 
 void OpenCL::init(int isGPU)
 {
+
+	getDevices(CL_DEVICE_TYPE_ACCELERATOR);
+/*
 	if (isGPU)
 		getDevices(CL_DEVICE_TYPE_GPU);
 	else
-		getDevices(CL_DEVICE_TYPE_CPU);
+		getDevices(CL_DEVICE_TYPE_ACCELERATOR); */
 
 	buildKernel();
 }

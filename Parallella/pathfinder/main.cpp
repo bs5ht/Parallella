@@ -88,5 +88,125 @@ void fatal(char *s)
 
 int main(int argc, char** argv)
 {
+	init(argc, argv);
+	// Pyramid parameters.
+	int borderCols = (pyramid_height) * HALO;
+	// int smallBlockCol = ?????? - (pyramid_height) * HALO * 2;
+	// int blockCols = cols / smallBlockCol + ((cols % smallBlockCol == 0) ? 0 : 1);
+
+	/*
+	 printf("pyramidHeight: %d\ngridSize: [%d]\nborder:[%d]\nblockSize: %d\nblockGrid:[%d]\ntargetBlock:[%d]\n",
+	   pyramid_height, cols, borderCols, NUMBER_THREADS, blockCols, smallBlockCol);  */
+
+	int size = rows * cols;
+
+	// Create and initialize the OpenCL object.
+	OpenCL cl(1);  // 1 means to display output (debugging mode).
+	cl.init(1);    // 1 means to use GPU. 0 means use CPU.
+	cl.gwSize(rows * cols);
+	printf("gpu setup");
+	// Create and build the kernel.
+	string kn = "dynproc_kernel";  // the kernel name, for future use.
+	cl.createKernel(kn);
+
+	// Allocate device memory.
+	cl_mem d_gpuWall = clCreateBuffer(cl.ctxt(),
+	                                  CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+	                                  sizeof(cl_int)*(size-cols),
+	                                  (data + cols),
+	                                  NULL);
+
+	cl_mem d_gpuResult[2];
+
+	d_gpuResult[0] = clCreateBuffer(cl.ctxt(),
+	                                CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
+	                                sizeof(cl_int)*cols,
+	                                data,
+	                                NULL);
+
+	d_gpuResult[1] = clCreateBuffer(cl.ctxt(),
+	                                CL_MEM_READ_WRITE,
+	                                sizeof(cl_int)*cols,
+	                                NULL,
+	                                NULL);
+
+	cl_int* h_outputBuffer = (cl_int*)malloc(16384*sizeof(cl_int));
+	for (int i = 0; i < 16384; i++)
+	{
+		h_outputBuffer[i] = 0;
+	}
+	cl_mem d_outputBuffer = clCreateBuffer(cl.ctxt(),
+	                                       CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
+	                                       sizeof(cl_int)*16384,
+	                                       h_outputBuffer,
+	                                       NULL);
+
+	int src = 1, final_ret = 0;
+	for (int t = 0; t < rows - 1; t += pyramid_height)
+	{
+		int temp = src;
+		src = final_ret;
+		final_ret = temp;
+
+		// Calculate this for the kernel argument...
+		int arg0 = MIN(pyramid_height, rows-t-1);
+		int theHalo = HALO;
+
+		// Set the kernel arguments.
+		clSetKernelArg(cl.kernel(kn), 0,  sizeof(cl_int), (void*) &arg0);
+		clSetKernelArg(cl.kernel(kn), 1,  sizeof(cl_mem), (void*) &d_gpuWall);
+		clSetKernelArg(cl.kernel(kn), 2,  sizeof(cl_mem), (void*) &d_gpuResult[src]);
+		clSetKernelArg(cl.kernel(kn), 3,  sizeof(cl_mem), (void*) &d_gpuResult[final_ret]);
+		clSetKernelArg(cl.kernel(kn), 4,  sizeof(cl_int), (void*) &cols);
+		clSetKernelArg(cl.kernel(kn), 5,  sizeof(cl_int), (void*) &rows);
+		clSetKernelArg(cl.kernel(kn), 6,  sizeof(cl_int), (void*) &t);
+		clSetKernelArg(cl.kernel(kn), 7,  sizeof(cl_int), (void*) &borderCols);
+		clSetKernelArg(cl.kernel(kn), 8,  sizeof(cl_int), (void*) &theHalo);
+		clSetKernelArg(cl.kernel(kn), 9,  sizeof(cl_int) * (cl.localSize()), 0);
+		clSetKernelArg(cl.kernel(kn), 10, sizeof(cl_int) * (cl.localSize()), 0);
+		clSetKernelArg(cl.kernel(kn), 11, sizeof(cl_mem), (void*) &d_outputBuffer);
+		cl.launch(kn);
+	}
+
+	// Copy results back to host.
+	clEnqueueReadBuffer(cl.q(),                   // The command queue.
+	                    d_gpuResult[final_ret],   // The result on the device.
+	                    CL_TRUE,                  // Blocking? (ie. Wait at this line until read has finished?)
+	                    0,                        // Offset. None in this case.
+	                    sizeof(cl_int)*cols,      // Size to copy.
+	                    result,                   // The pointer to the memory on the host.
+	                    0,                        // Number of events in wait list. Not used.
+	                    NULL,                     // Event wait list. Not used.
+	                    NULL);                    // Event object for determining status. Not used.
+
+
+	// Copy string buffer used for debugging from device to host.
+	clEnqueueReadBuffer(cl.q(),                   // The command queue.
+	                    d_outputBuffer,           // Debug buffer on the device.
+	                    CL_TRUE,                  // Blocking? (ie. Wait at this line until read has finished?)
+	                    0,                        // Offset. None in this case.
+	                    sizeof(cl_char)*16384,    // Size to copy.
+	                    h_outputBuffer,           // The pointer to the memory on the host.
+	                    0,                        // Number of events in wait list. Not used.
+	                    NULL,                     // Event wait list. Not used.
+	                    NULL);                    // Event object for determining status. Not used.
 	
+	// Tack a null terminator at the end of the string.
+	h_outputBuffer[16383] = '\0';
+	
+#ifdef BENCH_PRINT
+	for (int i = 0; i < cols; i++)
+		printf("%d ", data[i]);
+	printf("\n");
+	for (int i = 0; i < cols; i++)
+		printf("%d ", result[i]);
+	printf("\n");
+#endif
+
+	// Memory cleanup here.
+	delete[] data;
+	delete[] wall;
+	delete[] result;
+	
+	return EXIT_SUCCESS;
 }
